@@ -42,8 +42,11 @@ namespace Webserver
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
 
+                // Add index.html if needed
+                string location = AddIndex(request.RawUrl);
+
                 // Construct a response.
-                string filePath = Path.Combine(Directory.GetCurrentDirectory() + request.RawUrl);
+                string filePath = Path.Combine(Directory.GetCurrentDirectory() + location);
                 byte[] buffer = File.ReadAllBytes(filePath);
                 counter++;
                 
@@ -68,6 +71,14 @@ namespace Webserver
             string contentType;
             new FileExtensionContentTypeProvider().TryGetContentType(path, out contentType);
             return contentType ?? "application/octet-stream";
+        }
+
+        public static string AddIndex(string rawUrl)
+        {
+            if (rawUrl.EndsWith('/'))
+                return rawUrl + "index.html";
+            else
+                return rawUrl;
         }
     }
 }
