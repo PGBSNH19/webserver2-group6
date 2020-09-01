@@ -6,25 +6,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="anotherpage.htm">
+    <None Update="Content\anotherpage.htm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="document.pdf">
+    <None Update="Content\document.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="index.html">
+    <None Update="Content\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="laughing_panda.jpg">
+    <None Update="Content\laughing_panda.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="pianocat.gif">
+    <None Update="Content\pianocat.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="script.js">
+    <None Update="Content\script.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="style.css">
+    <None Update="Content\style.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
