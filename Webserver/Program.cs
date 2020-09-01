@@ -1,11 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.StaticFiles;
+using System;
 using System.IO;
 using System.Net;
+using System.Web;
 
 namespace Webserver
 {
     class Program
     {
+        private static int counter = 0;
         static void Main(string[] args)
         {
             SimpleListenerExample(new string[] { "http://localhost:8080/" });
@@ -38,16 +41,33 @@ namespace Webserver
                 HttpListenerRequest request = context.Request;
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
-                // Construct a response.
-                byte[] buffer = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory() + request.RawUrl));
 
+                // Construct a response.
+                string filePath = Path.Combine(Directory.GetCurrentDirectory() + request.RawUrl);
+                byte[] buffer = File.ReadAllBytes(filePath);
+                counter++;
+                
                 response.ContentLength64 = buffer.Length;
-                System.IO.Stream stream = response.OutputStream;
+                response.AddHeader("Expires", DateTime.Now.AddYears(1).ToString());
+                response.AddHeader("StatusCode", response.StatusCode.ToString());
+                response.AddHeader("Content-Type", GetContentType(filePath));
+
+                string contentType = GetContentType(filePath);
+                Console.WriteLine("Counter: " + counter + " " + contentType);
+
+                Stream stream = response.OutputStream;
                 stream.Write(buffer, 0, buffer.Length);
                 stream.Close();
-
+                
                 //listener.Stop();
             }
+
+        }
+        private static string GetContentType(string path)
+        {
+            string contentType;
+            new FileExtensionContentTypeProvider().TryGetContentType(path, out contentType);
+            return contentType ?? "application/octet-stream";
         }
     }
 }
