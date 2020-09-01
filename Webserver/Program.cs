@@ -32,7 +32,6 @@ namespace Webserver
                 listener.Prefixes.Add(s);
             }
 
-
             // Start the listener
             listener.Start();
             Console.WriteLine("Listening...");
@@ -50,7 +49,7 @@ namespace Webserver
                     location = GetFullAdress(request);
 
                 // Exit if it's a request for a file that doesn't exists
-                if (File.Exists(Path.Combine(Directory.GetCurrentDirectory() + location)))
+                if (File.Exists(Path.Combine(Directory.GetCurrentDirectory() + location)) || location == "/counter")
                 {
                     // Obtain a response object.
                     HttpListenerResponse response = context.Response;
@@ -64,45 +63,22 @@ namespace Webserver
 
                     // Correct path to make it count on the same counter on all pages
                     counterCookie.Path = "/";
-
                     // Add the cookie to the response
                     response.Cookies.Add(counterCookie);
-
 
                     // Add a response code
                     response.StatusCode = (int)HttpStatusCode.OK;
 
-                    // Construct a response.
-                    byte[] buffer = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory() + location));
-                    response.ContentLength64 = buffer.Length;
-                    Stream stream = response.OutputStream;
-                    stream.Write(buffer, 0, buffer.Length);
-                    stream.Close();
-                }
-                else if (location == "/counter")
-                {
-                    // Obtain a response object.
-                    HttpListenerResponse response = context.Response;
+                    // Construct a response. Depending on endpoint
+                    byte [] buffer;
+                    if (location == "/counter")
+                    {
+                        string responseString = $"<html><body><p style=font-size:42px;text-align:center>{counterCookie.Value}</br></br><a href=http://{request.Url.Authority}/content/>Home</a></p></body></html>";
+                        buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                    }
+                    else
+                        buffer = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory() + location));
 
-                    // Create a new cookie if there isn't one or add +1 to the counter
-                    Cookie counterCookie = request.Cookies["Counter"];
-                    if (counterCookie == null)
-                        counterCookie = new Cookie("Counter", "1");
-
-                    // Correct path to make it count on the same counter on all pages
-                    counterCookie.Path = "/";
-
-                    // Add the cookie to the response
-                    response.Cookies.Add(counterCookie);
-
-
-                    // Add a response code
-                    response.StatusCode = (int)HttpStatusCode.OK;
-
-
-                    // Construct a response.
-                    string responseString = $"<html><body><p style=font-size:42px;text-align:center>{counterCookie.Value}</br></br><a href=http://{request.Url.Authority}/content/>Home</a></p></body></html>";
-                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                     response.ContentLength64 = buffer.Length;
                     Stream stream = response.OutputStream;
                     stream.Write(buffer, 0, buffer.Length);
@@ -112,7 +88,7 @@ namespace Webserver
 
             //listener.Stop();
         }
-
+        
         public static string GetFullAdress(HttpListenerRequest request)
         {
             // Check if there's no referrer
