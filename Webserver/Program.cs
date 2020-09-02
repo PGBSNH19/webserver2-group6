@@ -62,11 +62,16 @@ namespace Webserver
                 {
                     buffer = Encoding.ASCII.GetBytes(response.Cookies["counter"].Value);
                 }
-                else
+                else if (File.Exists(filePath))
                 {
                     buffer = File.ReadAllBytes(filePath);
                     response.AddHeader("Content-Type", GetContentType(filePath));
                     response.AddHeader("ETag", "\"" + CalculateMD5Hash(filePath) + "\"");
+                }
+                else
+                {
+                    string responseString = "<html><body>404</br>Page not found.</body></html>";
+                    buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                 }
 
                 response.ContentLength64 = buffer.Length;
