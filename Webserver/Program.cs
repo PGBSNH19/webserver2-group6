@@ -52,9 +52,7 @@ namespace Webserver
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
                 // Construct a response.
-
                 string correctUrl = CorrectAdress(request.RawUrl);
-
 
                 string filePath = Path.Combine(Directory.GetCurrentDirectory() + correctUrl);
                 byte[] buffer;
@@ -68,12 +66,20 @@ namespace Webserver
                 }
                 else if (correctUrl.StartsWith("/dynamic"))
                 {
-                    int value1 = 0;
-                    int.TryParse(request.QueryString.Get("input1"), out value1);
-                    int value2 = 0;
-                    int.TryParse(request.QueryString.Get("input2"), out value2);
+                    int calculatedInput = CalculateInputParameters(request);
+                    string responseString;
 
-                    buffer = Encoding.ASCII.GetBytes((value1 + value2).ToString());
+                    if (request.Headers.Get("Accept") == "application/xml")
+                    {
+                        responseString = "<result><value>" + calculatedInput + "</value></result>";
+                        response.AddHeader("Content-Type", "application/xml");
+                    }
+                    else
+                    {
+                        responseString = "<html><body>" + calculatedInput + "</body></html>";
+                        response.AddHeader("Content-Type", "text/html");
+                    }
+                    buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                 }
                 else if (File.Exists(filePath))
                 {
@@ -95,6 +101,16 @@ namespace Webserver
             }
 
             //listener.Stop();
+        }
+
+        private static int CalculateInputParameters(HttpListenerRequest request)
+        {
+            int value1 = 0;
+            int.TryParse(request.QueryString.Get("input1"), out value1);
+            int value2 = 0;
+            int.TryParse(request.QueryString.Get("input2"), out value2);
+
+            return value1 + value2;
         }
 
         private static string GetContentType(string path)
