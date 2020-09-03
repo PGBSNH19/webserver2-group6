@@ -55,12 +55,21 @@ namespace Webserver
                 string filePath = Path.Combine(Directory.GetCurrentDirectory() + request.RawUrl);
                 byte[] buffer;
                 Stream stream = response.OutputStream;
-
+               
                 counter++;
                 response.Cookies.Add(new Cookie("counter", counter.ToString()));
                 if (request.RawUrl == "/counter")
                 {
                     buffer = Encoding.ASCII.GetBytes(response.Cookies["counter"].Value);
+                }
+                else if (request.RawUrl.StartsWith("/dynamic"))
+                {
+                    int value1 = 0;
+                    int.TryParse(request.QueryString.Get("input1"), out value1);
+                    int value2 = 0;
+                    int.TryParse(request.QueryString.Get("input2"), out value2);
+
+                    buffer = Encoding.ASCII.GetBytes((value1 + value2).ToString());
                 }
                 else if (File.Exists(filePath))
                 {
