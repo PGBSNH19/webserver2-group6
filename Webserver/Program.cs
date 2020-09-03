@@ -52,17 +52,21 @@ namespace Webserver
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
                 // Construct a response.
-                string filePath = Path.Combine(Directory.GetCurrentDirectory() + request.RawUrl);
+
+                string correctUrl = CorrectAdress(request.RawUrl);
+
+
+                string filePath = Path.Combine(Directory.GetCurrentDirectory() + correctUrl);
                 byte[] buffer;
                 Stream stream = response.OutputStream;
                
                 counter++;
                 response.Cookies.Add(new Cookie("counter", counter.ToString()));
-                if (request.RawUrl == "/counter")
+                if (correctUrl == "/counter")
                 {
                     buffer = Encoding.ASCII.GetBytes(response.Cookies["counter"].Value);
                 }
-                else if (request.RawUrl.StartsWith("/dynamic"))
+                else if (correctUrl.StartsWith("/dynamic"))
                 {
                     int value1 = 0;
                     int.TryParse(request.QueryString.Get("input1"), out value1);
@@ -110,6 +114,19 @@ namespace Webserver
                     return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
                 }
             }
+        }
+
+        private static string CorrectAdress(string rawUrl)
+        {
+            if (rawUrl.EndsWith('/') & File.Exists(Path.Combine(Directory.GetCurrentDirectory() + rawUrl) + "index.html"))
+            {
+                return rawUrl + "index.html";
+            }
+            else if (rawUrl.EndsWith('/'))
+            {
+                return rawUrl.Remove(rawUrl.Length - 1);
+            }
+            return rawUrl;
         }
     }
 }
